@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Session SID="1" BitFlags="81">
+  <SessionTimers ClientConnected="2018-03-31T12:43:33.0112985+09:00" ClientBeginRequest="2018-03-31T12:43:33.0122988+09:00" GotRequestHeaders="2018-03-31T12:43:33.0122988+09:00" ClientDoneRequest="2018-03-31T12:43:33.0122988+09:00" GatewayTime="0" DNSTime="175" TCPConnectTime="160" HTTPSHandshakeTime="1905" ServerConnected="2018-03-31T12:43:33.3532965+09:00" FiddlerBeginRequest="2018-03-31T12:43:35.2584025+09:00" ServerGotRequest="2018-03-31T12:43:35.2584025+09:00" ServerBeginResponse="2018-03-31T12:43:35.4505154+09:00" GotResponseHeaders="2018-03-31T12:43:35.4505154+09:00" ServerDoneResponse="2018-03-31T12:43:35.4515157+09:00" ClientBeginResponse="2018-03-31T12:43:35.4515157+09:00" ClientDoneResponse="2018-03-31T12:43:35.4515157+09:00" />
+  <PipeInfo />
+  <SessionFlags>
+    <SessionFlag N="x-responsebodytransferlength" V="528" />
+    <SessionFlag N="x-egressport" V="54077" />
+    <SessionFlag N="x-autoauth" V="(default)" />
+    <SessionFlag N="x-clientport" V="0" />
+    <SessionFlag N="x-clientip" V="127.0.0.1" />
+    <SessionFlag N="x-builder-maxredir" V="3" />
+    <SessionFlag N="x-hostip" V="127.0.0.1" />
+  </SessionFlags>
+  </Session>
