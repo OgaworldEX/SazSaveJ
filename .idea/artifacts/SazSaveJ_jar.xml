@@ -2,7 +2,7 @@
   <artifact type="jar" name="SazSaveJ:jar">
     <output-path>$PROJECT_DIR$/out/artifacts/SazSaveJ_jar</output-path>
     <root id="archive" name="SazSaveJ.jar">
-      <element id="module-output" name="untitled3.main" />
+      <element id="module-output" name="SazSaveJ.main" />
       <element id="extracted-dir" path="$USER_HOME$/.gradle/caches/modules-2/files-2.1/net.portswigger.burp.extensions/montoya-api/2023.3/c062f273295bc299b667b6c585af0459f6a3c422/montoya-api-2023.3.jar" path-in-jar="/" />
       <element id="dir-copy" path="$PROJECT_DIR$/src/main/resources" />
     </root>
