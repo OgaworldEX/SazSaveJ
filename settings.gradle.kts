@@ -1,2 +1,2 @@
-rootProject.name = "untitled3"
+rootProject.name = "SazSaveJ"
 include("SazSaveJ")
