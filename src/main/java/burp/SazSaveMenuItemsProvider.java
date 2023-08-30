@@ -1,4 +1,4 @@
-package burp;/*
+package burp;
 
 import burp.api.montoya.MontoyaApi;
 import burp.api.montoya.core.ToolType;
@@ -110,5 +110,5 @@ public class SazSaveMenuItemsProvider implements ContextMenuItemsProvider
 
         OgaSazSave.logging.logToOutput("New SazSavePath: " + inputValue);
     }
-
 }
+

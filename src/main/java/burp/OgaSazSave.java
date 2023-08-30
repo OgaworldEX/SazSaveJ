@@ -9,8 +9,8 @@ import java.util.Properties;
 
 public class OgaSazSave implements BurpExtension
 {
-    public final static String extensionName = "OgaSazSaveJ";
-    public final static String version = "1.0.0.1";
+    public final static String extensionName = "SazSaveJ";
+    public final static String version = "1.0.0";
 
     public final static String SAVE_PATH_KEY = "SAVE_PATH_KEY";
 
@@ -52,7 +52,7 @@ public class OgaSazSave implements BurpExtension
         }
 
         //OgaSazSave.logging.logToOutput("loadSavePath:" + loadSavePath);
-        OgaSazSave.logging.logToOutput("OgaSazSaveJ " + version + " Load ok");
+        OgaSazSave.logging.logToOutput("SazSaveJ " + version + " Load ok");
         OgaSazSave.logging.logToOutput("Config-SavePath: " + sazSavePath);
     }
 
