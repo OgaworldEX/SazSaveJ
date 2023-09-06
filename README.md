@@ -13,4 +13,4 @@ Exports SAZ (Session Archive) files in Fiddler's log format from Burp Suite.
 - Set the save path from the 'Config'. The save path will be restored upon startup.
 - Select the request you want to save, and then choose 'Save as Saz'.
 
-![sc](https://github.com/OgaworldEX/SazSaveJ/assets/7531669/ef44674e-e896-48a2-b15b-8970cb5983c5)
+![sc](https://github.com/OgaworldEX/SazSaveJ/assets/7531669/b1f0e856-c223-49ab-802f-23a3091c33c9)
