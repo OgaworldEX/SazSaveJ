@@ -3,6 +3,7 @@ package burp;
 import burp.api.montoya.MontoyaApi;
 import burp.api.montoya.http.message.HttpHeader;
 import burp.api.montoya.http.message.HttpRequestResponse;
+import burp.api.montoya.ui.contextmenu.MessageEditorHttpRequestResponse;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -11,6 +12,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.AbstractList;
+import java.util.ArrayList;
 import java.util.List;
 import java.io.IOException;
 

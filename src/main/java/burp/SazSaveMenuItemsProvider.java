@@ -5,6 +5,7 @@ import burp.api.montoya.core.ToolType;
 import burp.api.montoya.http.message.HttpRequestResponse;
 import burp.api.montoya.ui.contextmenu.ContextMenuEvent;
 import burp.api.montoya.ui.contextmenu.ContextMenuItemsProvider;
+import burp.api.montoya.ui.contextmenu.MessageEditorHttpRequestResponse;
 
 import javax.swing.*;
 import java.awt.*;
@@ -14,6 +15,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class SazSaveMenuItemsProvider implements ContextMenuItemsProvider
 {
@@ -26,29 +28,33 @@ public class SazSaveMenuItemsProvider implements ContextMenuItemsProvider
     @Override
     public List<Component> provideMenuItems(ContextMenuEvent event) {
 
-        if (event.isFromTool(ToolType.PROXY, ToolType.REPEATER,ToolType.TARGET, ToolType.LOGGER)) {
-            List<Component> menuItemList = new ArrayList<>();
+        List<Component> menuItemList = new ArrayList<>();
+        //saz save
+        JMenuItem sazSaveMenuItem = new JMenuItem("Save as Saz");
 
-            //saz save
-            JMenuItem sazSaveMenuItem = new JMenuItem("Save as Saz");
+        if(! event.selectedRequestResponses().isEmpty()){
             sazSaveMenuItem.addActionListener(e -> saveSelected(event.selectedRequestResponses()));
-            menuItemList.add(sazSaveMenuItem);
-
-            //config
-            JMenuItem configMenuItem = new JMenuItem("Config");
-            configMenuItem.addActionListener(e -> showConfig());
-            menuItemList.add(configMenuItem);
-
-            return menuItemList;
+        } else if( event.messageEditorRequestResponse().isPresent()){
+            List<HttpRequestResponse> reqresList = new ArrayList<>();
+            reqresList.add(event.messageEditorRequestResponse().get().requestResponse());
+            sazSaveMenuItem.addActionListener(e -> saveSelected(reqresList));
+        }else {
+            return null;
         }
-        return null;
+
+        menuItemList.add(sazSaveMenuItem);
+
+        //config
+        JMenuItem configMenuItem = new JMenuItem("Config");
+        configMenuItem.addActionListener(e -> showConfig());
+        menuItemList.add(configMenuItem);
+
+        return menuItemList;
     }
 
     private void saveSelected(List<HttpRequestResponse> selectedRequestResponsesList) {
 
-        if(selectedRequestResponsesList.size() < 0 ){
-            return;
-        }
+        OgaSazSave.logging.logToOutput("selectedRequestResponsesList.size()" + selectedRequestResponsesList.size());
 
         SazMaker sazMaker = new SazMaker(this.api);
         sazMaker.makeSaz(selectedRequestResponsesList);
