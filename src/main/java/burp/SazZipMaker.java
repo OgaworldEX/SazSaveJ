@@ -8,9 +8,6 @@ public class SazZipMaker {
 
     public static void exec(String sourceFolderPath, String zipFilePath) {
 
-        //SazSave.logging.logToOutput("sourceFolderPath:" + sourceFolderPath);
-        //SazSave.logging.logToOutput("zipFilePath:" + zipFilePath);
-
         try {
             zipFolder(new File(sourceFolderPath), new File(zipFilePath));
         } catch (IOException e) {
@@ -29,7 +26,6 @@ public class SazZipMaker {
 
         for (File file : files) {
             String entryName = parentPath + file.getName();
-            //SazSave.logging.logToOutput("entryName:" + entryName);
 
             if (file.isDirectory()) {
                 zipFolder(file, entryName + "/", zipOutputStream);

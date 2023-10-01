@@ -19,16 +19,15 @@ import java.io.IOException;
 
 public class SazMaker {
 
-    private final MontoyaApi api;
+    //private final MontoyaApi api;
 
-    private static String indexHeader = "<html><head><style>body,thead,td,a,p{font-family:verdana,sans-serif;font-size: 10px;}</style></head><body><table cols=12><thead><tr><th>&nbsp;</th><th>#</th><th>Result</th><th>Protocol</th><th>Host</th><th>URL</th><th>Body</th><th>Caching</th><th>Content-Type</th><th>Process</th><th>Comments</th><th>Custom</th></tr></thead><tbody>";
-    private static String indexBodybase = "<tr><td><a href='raw\\%d_c.txt'>C</a>&nbsp;<a href='raw\\%d_s.txt'>S</a>&nbsp;<a href='raw\\%d_m.xml'>M</a></td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>body</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>";
-    private static String indexFooter = "</tbody></table></body></html>";
-
+    private final static String indexHeader = "<html><head><style>body,thead,td,a,p{font-family:verdana,sans-serif;font-size: 10px;}</style></head><body><table cols=12><thead><tr><th>&nbsp;</th><th>#</th><th>Result</th><th>Protocol</th><th>Host</th><th>URL</th><th>Body</th><th>Caching</th><th>Content-Type</th><th>Process</th><th>Comments</th><th>Custom</th></tr></thead><tbody>";
+    private final static String indexBodybase = "<tr><td><a href='raw\\%d_c.txt'>C</a>&nbsp;<a href='raw\\%d_s.txt'>S</a>&nbsp;<a href='raw\\%d_m.xml'>M</a></td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>body</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>";
+    private final static String indexFooter = "</tbody></table></body></html>";
     private static String sazMxml;
     private static String sazContentsTypesxml;
 
-    private String savePath ;
+    //private String savePath ;
 
     static {
         sazMxml = getJarText("/Saz_m_xml.txt");
@@ -36,10 +35,10 @@ public class SazMaker {
     }
 
     public SazMaker(MontoyaApi api) {
-        this.api = api;
+        //this.api = api;
     }
 
-    public void makeSaz(List<HttpRequestResponse> selectedRequestResponsesList) {
+    public void makeSaz(List<HttpRequestResponse> selectedRequestResponsesList,String fileName) {
 
         //make tmp
         String tmpDirectory = System.getProperty("java.io.tmpdir");
@@ -102,7 +101,7 @@ public class SazMaker {
             String process = "";
             String custom = "";
 
-            //_index.htm を作っておく
+            //_index.htm
             indexhtm.append(String.format(indexBodybase,
                     i, i, i, number, result, protocol, host, path, caching, contentType, process, comments, custom));
 
@@ -111,17 +110,12 @@ public class SazMaker {
         indexhtm.append(indexFooter);
         makeFile(indexhtm.toString(), targetDirectoryPath + "/_index.htm");
 
-        //[[Content_Types].xml を作り
+        //[[Content_Types].xml
         makeFile(sazContentsTypesxml, targetDirectoryPath + "/[Content_Types].xml");
 
-        //zip化して出力する
-        LocalDateTime now = LocalDateTime.now();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss");
-        String formattedDateTime = now.format(formatter);
+        SazZipMaker.exec(targetDirectoryPath.toString(), OgaSazSave.sazSavePath + fileName + ".saz");
 
-        SazZipMaker.exec(targetDirectoryPath.toString(), OgaSazSave.sazSavePath + formattedDateTime + ".saz");
-
-        //テンポラリのディレクトリを削除する
+        //delete tmpdelectory
         deleteFolder(targetDirectoryPath.toFile());
     }
 
@@ -198,7 +192,7 @@ public class SazMaker {
                 fos.write(byteArray);
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            OgaSazSave.logging.logToError(e.getMessage());
         }
     }
 
@@ -206,7 +200,7 @@ public class SazMaker {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(distFilePath))) {
             writer.write(contents);
         } catch (IOException e) {
-            e.printStackTrace();
+            OgaSazSave.logging.logToError(e.getMessage());
         }
     }
 
@@ -225,7 +219,7 @@ public class SazMaker {
                 retValue = inputStream.readAllBytes();
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            OgaSazSave.logging.logToError(e.getMessage());
         }
         return retValue;
     }

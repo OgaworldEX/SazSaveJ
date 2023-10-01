@@ -10,7 +10,7 @@ import java.util.Properties;
 public class OgaSazSave implements BurpExtension
 {
     public final static String extensionName = "SazSaveJ";
-    public final static String version = "1.0.1";
+    public final static String version = "1.1.0";
 
     public final static String SAVE_PATH_KEY = "SAVE_PATH_KEY";
 
@@ -39,13 +39,14 @@ public class OgaSazSave implements BurpExtension
             properties.load(input);
             sazSavePath = properties.getProperty(SAVE_PATH_KEY);
         } catch (IOException ex) {
-            logging.logToError("Error reading configuration file: " + ex.getMessage());
+            logging.logToOutput("No Configuration file: " + ex.getMessage());
 
             sazSavePath = DEFAULT_SAVE_PATH;
 
             try (OutputStream output = new FileOutputStream(OgaSazSave.PROPERTIES_NAME)) {
                 properties.setProperty(SAVE_PATH_KEY, DEFAULT_SAVE_PATH);
                 properties.store(output, null);
+                logging.logToOutput("-Created Configuration file-");
             } catch (IOException io) {
                 logging.logToError(io.getMessage());
             }
@@ -53,7 +54,7 @@ public class OgaSazSave implements BurpExtension
 
         //OgaSazSave.logging.logToOutput("loadSavePath:" + loadSavePath);
         OgaSazSave.logging.logToOutput("SazSaveJ " + version + " Load ok");
-        OgaSazSave.logging.logToOutput("Config-SavePath: " + sazSavePath);
+        OgaSazSave.logging.logToOutput("Save Path: " + sazSavePath);
     }
 
 }

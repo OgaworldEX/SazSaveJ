@@ -1,11 +1,9 @@
 package burp;
 
 import burp.api.montoya.MontoyaApi;
-import burp.api.montoya.core.ToolType;
 import burp.api.montoya.http.message.HttpRequestResponse;
 import burp.api.montoya.ui.contextmenu.ContextMenuEvent;
 import burp.api.montoya.ui.contextmenu.ContextMenuItemsProvider;
-import burp.api.montoya.ui.contextmenu.MessageEditorHttpRequestResponse;
 
 import javax.swing.*;
 import java.awt.*;
@@ -13,9 +11,12 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 
 public class SazSaveMenuItemsProvider implements ContextMenuItemsProvider
 {
@@ -29,82 +30,123 @@ public class SazSaveMenuItemsProvider implements ContextMenuItemsProvider
     public List<Component> provideMenuItems(ContextMenuEvent event) {
 
         List<Component> menuItemList = new ArrayList<>();
-        //saz save
-        JMenuItem sazSaveMenuItem = new JMenuItem("Save as Saz");
+
+        //Save MenuItem
+        JMenuItem sazSaveInputFileNameMenuItem = new JMenuItem("Save as Saz (Input FileName)");
+        JMenuItem sazSaveTimeStampMenuItem = new JMenuItem("Save as Saz (Timestamp FileName)");
 
         if(! event.selectedRequestResponses().isEmpty()){
-            sazSaveMenuItem.addActionListener(e -> saveSelected(event.selectedRequestResponses()));
-        } else if( event.messageEditorRequestResponse().isPresent()){
+            sazSaveTimeStampMenuItem.addActionListener(e -> saveSelected(event.selectedRequestResponses()));
+            sazSaveInputFileNameMenuItem.addActionListener(e -> saveSelectedInputFileName(event.selectedRequestResponses()));
+
+        } else if(event.messageEditorRequestResponse().isPresent()){
             List<HttpRequestResponse> reqresList = new ArrayList<>();
             reqresList.add(event.messageEditorRequestResponse().get().requestResponse());
-            sazSaveMenuItem.addActionListener(e -> saveSelected(reqresList));
+
+            sazSaveTimeStampMenuItem.addActionListener(e -> saveSelected(reqresList));
+            sazSaveInputFileNameMenuItem.addActionListener(e -> saveSelectedInputFileName(event.selectedRequestResponses()));
         }else {
             return null;
         }
 
-        menuItemList.add(sazSaveMenuItem);
+        menuItemList.add(sazSaveInputFileNameMenuItem);
+        menuItemList.add(sazSaveTimeStampMenuItem);
 
-        //config
-        JMenuItem configMenuItem = new JMenuItem("Config");
-        configMenuItem.addActionListener(e -> showConfig());
+        //config MenuItem
+        JMenuItem configMenuItem = new JMenuItem("Setting Save Path");
+        configMenuItem.addActionListener(e -> showDirectoryChooseDialog());
+
         menuItemList.add(configMenuItem);
 
         return menuItemList;
     }
 
     private void saveSelected(List<HttpRequestResponse> selectedRequestResponsesList) {
-
-        OgaSazSave.logging.logToOutput("selectedRequestResponsesList.size()" + selectedRequestResponsesList.size());
+        LocalDateTime now = LocalDateTime.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss");
+        String formattedDateTime = now.format(formatter);
 
         SazMaker sazMaker = new SazMaker(this.api);
-        sazMaker.makeSaz(selectedRequestResponsesList);
+        sazMaker.makeSaz(selectedRequestResponsesList,formattedDateTime);
     }
 
-    private void showConfig() {
-        //OgaSazSave.logging.logToOutput("call: showConfig()");
+    private void saveSelectedInputFileName(List<HttpRequestResponse> selectedRequestResponsesList) {
+        //OgaSazSave.logging.logToOutput("call saveSelectedInputFileName()");
 
-        String inputValue = null;
+        String saveFileName = null;
         while (true) {
+            saveFileName = JOptionPane.showInputDialog(
+                    api.userInterface().swingUtils().suiteFrame(),
+                    "Enter a saz file name",
+                    "");
 
-            inputValue = JOptionPane.showInputDialog(
-                api.userInterface().swingUtils().suiteFrame(),
-                "Enter a new save path for the saz file",
-                OgaSazSave.sazSavePath);
-
-            if (inputValue == null){
-                //OgaSazSave.logging.logToOutput("cancel");
+            if (saveFileName == null){
+                //OgaSazSave.logging.logToOutput("select cancel");
                 return;
             }else {
-                //OgaSazSave.logging.logToOutput("InputPath: " + inputValue);
-
                 // input check
-                Path path = Paths.get(inputValue);
-                if (Files.exists(path) == false) {
-                    JOptionPane.showMessageDialog(api.userInterface().swingUtils().suiteFrame(),
-                            "The path does not exist",
+                Path checkSavePath = Paths.get(OgaSazSave.sazSavePath + saveFileName + ".saz");
+
+                if (Files.exists(checkSavePath)) {
+                    JOptionPane.showMessageDialog(
+                            api.userInterface().swingUtils().suiteFrame(),
+                            "Saz file does not exist",
                             "Input Error",
                             JOptionPane.ERROR_MESSAGE);
                 }
 
-                if (Files.isRegularFile(path)) {
-                    JOptionPane.showMessageDialog(api.userInterface().swingUtils().suiteFrame(),
-                            "The path is a file.",
+                if (Files.isDirectory(checkSavePath)) {
+                    JOptionPane.showMessageDialog(
+                            api.userInterface().swingUtils().suiteFrame(),
+                            "The path is a Directory.",
                             "Input Error",
                             JOptionPane.ERROR_MESSAGE);
                 }
 
-                if (Files.isDirectory(path)) {
-                    break;
+                //invalid characters in the file name
+                String invalidCharsRegex = "[\\\\/:*?\"<>|]";
+
+                Pattern pattern = Pattern.compile(invalidCharsRegex);
+                Matcher matcher = pattern.matcher(saveFileName);
+
+                if (matcher.find()) {
+                    JOptionPane.showMessageDialog(
+                            api.userInterface().swingUtils().suiteFrame(),
+                            "invalid characters in the file name",
+                            "Input Error",
+                            JOptionPane.ERROR_MESSAGE);
+                } else {
+                    if (Files.notExists(checkSavePath)) {
+                        break;
+                    }
                 }
             }
         }
 
-        if (!inputValue.endsWith(File.separator)) {
-            inputValue += File.separator;
-        }
-        OgaSazSave.sazSavePath = inputValue;
+        SazMaker sazMaker = new SazMaker(this.api);
+        sazMaker.makeSaz(selectedRequestResponsesList,saveFileName);
+    }
 
-        // save
+    private void showDirectoryChooseDialog(){
+        //OgaSazSave.logging.logToOutput("call showDirectoryChooseDialog()");
+
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+
+        int selected = fileChooser.showOpenDialog(api.userInterface().swingUtils().suiteFrame());
+
+        if (selected == JFileChooser.APPROVE_OPTION){
+            OgaSazSave.logging.logToOutput(fileChooser.getSelectedFile().getPath());
+        }else if (selected == JFileChooser.CANCEL_OPTION){
+            return;
+        }else if (selected == JFileChooser.ERROR_OPTION){
+            return;
+        }else{
+            return;
+        }
+        OgaSazSave.sazSavePath = fileChooser.getSelectedFile().getPath() + System.getProperty("file.separator");
+
+        //save
         try (OutputStream output = new FileOutputStream(OgaSazSave.PROPERTIES_NAME)) {
             OgaSazSave.properties.setProperty(OgaSazSave.SAVE_PATH_KEY, OgaSazSave.sazSavePath);
             OgaSazSave.properties.store(output, null);
@@ -114,7 +156,10 @@ public class SazSaveMenuItemsProvider implements ContextMenuItemsProvider
             OgaSazSave.logging.logToError("Configuration IO Exception." + e.getMessage());
         }
 
-        OgaSazSave.logging.logToOutput("New SazSavePath: " + inputValue);
+        //message
+        JOptionPane.showMessageDialog(
+                api.userInterface().swingUtils().suiteFrame(),
+                "[New Saz Save Path]\n" + OgaSazSave.sazSavePath,
+                "SazSaveJ", JOptionPane.INFORMATION_MESSAGE);
     }
 }
-
