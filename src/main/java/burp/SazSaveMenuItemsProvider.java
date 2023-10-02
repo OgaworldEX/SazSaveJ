@@ -44,7 +44,7 @@ public class SazSaveMenuItemsProvider implements ContextMenuItemsProvider
             reqresList.add(event.messageEditorRequestResponse().get().requestResponse());
 
             sazSaveTimeStampMenuItem.addActionListener(e -> saveSelected(reqresList));
-            sazSaveInputFileNameMenuItem.addActionListener(e -> saveSelectedInputFileName(event.selectedRequestResponses()));
+            sazSaveInputFileNameMenuItem.addActionListener(e -> saveSelectedInputFileName(reqresList));
         }else {
             return null;
         }

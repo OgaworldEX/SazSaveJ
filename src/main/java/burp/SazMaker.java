@@ -171,7 +171,7 @@ public class SazMaker {
                         .filter(httpHeader -> httpHeader.name().equals(name)).toList();
 
         String retValue = "";
-        if (headers.size() > 0) {
+        if (!headers.isEmpty()) {
             retValue = headers.get(0).value();
         }
         return retValue;
