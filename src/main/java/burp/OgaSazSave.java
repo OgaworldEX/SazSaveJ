@@ -10,13 +10,13 @@ import java.util.Properties;
 public class OgaSazSave implements BurpExtension
 {
     public final static String extensionName = "SazSaveJ";
-    public final static String version = "1.1.1";
+    public final static String version = "1.2.0";
 
     public final static String SAVE_PATH_KEY = "SAVE_PATH_KEY";
 
     public final static String PROPERTIES_NAME = "OgaSazSaveConfig.properties";
 
-    public final static String DEFAULT_SAVE_PATH = "c:/tmp/";
+    public final static String DEFAULT_SAVE_PATH = "c:\\tmp\\";
 
     public static Logging logging ;
 

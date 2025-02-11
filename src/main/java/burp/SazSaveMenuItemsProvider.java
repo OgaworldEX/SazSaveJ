@@ -8,6 +8,7 @@ import burp.api.montoya.ui.contextmenu.ContextMenuItemsProvider;
 import javax.swing.*;
 import java.awt.*;
 import java.io.*;
+import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -55,7 +56,7 @@ public class SazSaveMenuItemsProvider implements ContextMenuItemsProvider
         //config MenuItem
         JMenuItem configMenuItem = new JMenuItem("Setting Save Path");
         configMenuItem.addActionListener(e -> showDirectoryChooseDialog());
-
+        menuItemList.add(new JPopupMenu.Separator());
         menuItemList.add(configMenuItem);
 
         return menuItemList;
@@ -71,56 +72,48 @@ public class SazSaveMenuItemsProvider implements ContextMenuItemsProvider
     }
 
     private void saveSelectedInputFileName(List<HttpRequestResponse> selectedRequestResponsesList) {
-        //OgaSazSave.logging.logToOutput("call saveSelectedInputFileName()");
 
-        String saveFileName = null;
-        while (true) {
-            saveFileName = JOptionPane.showInputDialog(
+        String saveFileName;
+
+        saveFileName = JOptionPane.showInputDialog(
+                api.userInterface().swingUtils().suiteFrame(),
+                "Enter a saz file name\n"+OgaSazSave.sazSavePath,
+                "");
+
+        //invalid characters in the file name
+        String invalidCharsRegex = "[\\\\/:*?\"<>|]";
+
+        Pattern pattern = Pattern.compile(invalidCharsRegex);
+        Matcher matcher = pattern.matcher(saveFileName);
+
+        if (matcher.find()) {
+            JOptionPane.showMessageDialog(
                     api.userInterface().swingUtils().suiteFrame(),
-                    "Enter a saz file name",
-                    "");
+                    "invalid characters in the file name\n"+matcher.group(),
+                    "Input Error",
+                    JOptionPane.ERROR_MESSAGE);
+            return;
+        }
 
-            if (saveFileName == null){
-                //OgaSazSave.logging.logToOutput("select cancel");
-                return;
-            }else {
-                // input check
-                Path checkSavePath = Paths.get(OgaSazSave.sazSavePath + saveFileName + ".saz");
+        // Path check
+        Path checkSavePath = Paths.get(OgaSazSave.sazSavePath + saveFileName + ".saz");
 
-                if (Files.exists(checkSavePath)) {
-                    JOptionPane.showMessageDialog(
-                            api.userInterface().swingUtils().suiteFrame(),
-                            "Saz file does not exist",
-                            "Input Error",
-                            JOptionPane.ERROR_MESSAGE);
-                }
+        if (Files.exists(checkSavePath)) {
+            JOptionPane.showMessageDialog(
+                    api.userInterface().swingUtils().suiteFrame(),
+                    "Saz file does not exist",
+                    "Input Error",
+                    JOptionPane.ERROR_MESSAGE);
+            return;
+        }
 
-                if (Files.isDirectory(checkSavePath)) {
-                    JOptionPane.showMessageDialog(
-                            api.userInterface().swingUtils().suiteFrame(),
-                            "The path is a Directory.",
-                            "Input Error",
-                            JOptionPane.ERROR_MESSAGE);
-                }
-
-                //invalid characters in the file name
-                String invalidCharsRegex = "[\\\\/:*?\"<>|]";
-
-                Pattern pattern = Pattern.compile(invalidCharsRegex);
-                Matcher matcher = pattern.matcher(saveFileName);
-
-                if (matcher.find()) {
-                    JOptionPane.showMessageDialog(
-                            api.userInterface().swingUtils().suiteFrame(),
-                            "invalid characters in the file name",
-                            "Input Error",
-                            JOptionPane.ERROR_MESSAGE);
-                } else {
-                    if (Files.notExists(checkSavePath)) {
-                        break;
-                    }
-                }
-            }
+        if (Files.isDirectory(checkSavePath)) {
+            JOptionPane.showMessageDialog(
+                    api.userInterface().swingUtils().suiteFrame(),
+                    "The path is a Directory.",
+                    "Input Error",
+                    JOptionPane.ERROR_MESSAGE);
+            return;
         }
 
         SazMaker sazMaker = new SazMaker(this.api);
@@ -130,8 +123,11 @@ public class SazSaveMenuItemsProvider implements ContextMenuItemsProvider
     private void showDirectoryChooseDialog(){
         //OgaSazSave.logging.logToOutput("call showDirectoryChooseDialog()");
 
+        File currentfile = new File(OgaSazSave.sazSavePath);
+
         JFileChooser fileChooser = new JFileChooser();
         fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        fileChooser.setCurrentDirectory(currentfile);
 
         int selected = fileChooser.showOpenDialog(api.userInterface().swingUtils().suiteFrame());
 
@@ -144,7 +140,7 @@ public class SazSaveMenuItemsProvider implements ContextMenuItemsProvider
         }else{
             return;
         }
-        OgaSazSave.sazSavePath = fileChooser.getSelectedFile().getPath() + System.getProperty("file.separator");
+        OgaSazSave.sazSavePath = fileChooser.getSelectedFile().getPath() + FileSystems.getDefault().getSeparator();
 
         //save
         try (OutputStream output = new FileOutputStream(OgaSazSave.PROPERTIES_NAME)) {
