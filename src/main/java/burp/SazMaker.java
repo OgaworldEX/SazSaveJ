@@ -79,12 +79,17 @@ public class SazMaker {
 
             //0_m.xml
             String m_xmlFileName = i + "_m.xml";
-            makeFile(sazMxml, rawDirectoryPath + "/" + m_xmlFileName);
+
+            //notes to comment
+            String notes = requestResponse.annotations().notes();
+            String escapeComment = notes.replace("\"", "&quot;");
+            String newSazXML = String.format(sazMxml,escapeComment);
+            makeFile(newSazXML, rawDirectoryPath + "/" + m_xmlFileName);
 
             //0_s.txt
             String s_txtFileName = i + "_s.txt";
             if(requestResponse.response() == null){
-                makeFile("HTTP/0.0 999 No Response\r\n\r\n".getBytes(), rawDirectoryPath + "/" + s_txtFileName);
+                makeFile("HTTP/0.0 999 No Response (SazSaveJ)\r\n\r\n".getBytes(), rawDirectoryPath + "/" + s_txtFileName);
             }else{
                 makeFile(requestResponse.response().toByteArray().getBytes(), rawDirectoryPath + "/" + s_txtFileName);
             }

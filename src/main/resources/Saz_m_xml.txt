@@ -10,5 +10,6 @@
     <SessionFlag N="x-clientip" V="127.0.0.1" />
     <SessionFlag N="x-builder-maxredir" V="3" />
     <SessionFlag N="x-hostip" V="127.0.0.1" />
+    <SessionFlag N="ui-comments" V="%s" />
   </SessionFlags>
   </Session>
