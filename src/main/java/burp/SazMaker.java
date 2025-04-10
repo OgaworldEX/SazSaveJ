@@ -82,7 +82,12 @@ public class SazMaker {
 
             //notes to comment
             String notes = requestResponse.annotations().notes();
-            String escapeComment = notes.replace("\"", "&quot;");
+
+            String escapeComment = "";
+            if(notes != null ){
+                escapeComment = notes.replace("\"", "&quot;");
+            }
+
             String newSazXML = String.format(sazMxml,escapeComment);
             makeFile(newSazXML, rawDirectoryPath + "/" + m_xmlFileName);
 
