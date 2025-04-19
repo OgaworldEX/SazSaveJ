@@ -101,7 +101,7 @@ public class SazSaveMenuItemsProvider implements ContextMenuItemsProvider
         if (Files.exists(checkSavePath)) {
             JOptionPane.showMessageDialog(
                     api.userInterface().swingUtils().suiteFrame(),
-                    "Saz file does not exist",
+                    "Sazfile already exists.",
                     "Input Error",
                     JOptionPane.ERROR_MESSAGE);
             return;

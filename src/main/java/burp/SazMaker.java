@@ -10,10 +10,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.AbstractList;
-import java.util.ArrayList;
 import java.util.List;
 import java.io.IOException;
 
@@ -86,6 +82,9 @@ public class SazMaker {
             String escapeComment = "";
             if(notes != null ){
                 escapeComment = notes.replace("\"", "&quot;");
+            }else{
+                escapeComment = "Notes could not be retrieved because there is a space at the beginning of the Notes field.";
+                OgaSazSave.logging.logToError(i + ": "+ escapeComment);
             }
 
             String newSazXML = String.format(sazMxml,escapeComment);
