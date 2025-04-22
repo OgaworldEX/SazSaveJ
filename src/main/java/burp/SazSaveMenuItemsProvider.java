@@ -67,8 +67,8 @@ public class SazSaveMenuItemsProvider implements ContextMenuItemsProvider
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss");
         String formattedDateTime = now.format(formatter);
 
-        SazMaker sazMaker = new SazMaker(this.api);
-        sazMaker.makeSaz(selectedRequestResponsesList,formattedDateTime);
+        makeSaz(selectedRequestResponsesList,formattedDateTime);
+
     }
 
     private void saveSelectedInputFileName(List<HttpRequestResponse> selectedRequestResponsesList) {
@@ -116,12 +116,35 @@ public class SazSaveMenuItemsProvider implements ContextMenuItemsProvider
             return;
         }
 
-        SazMaker sazMaker = new SazMaker(this.api);
-        sazMaker.makeSaz(selectedRequestResponsesList,saveFileName);
+        makeSaz(selectedRequestResponsesList,saveFileName);
+    }
+
+    private void makeSaz(List<HttpRequestResponse> selectedRequestResponsesList,String fileName){
+
+        JDialog dialog = new JDialog((Frame) null, "Processing...", true);
+        dialog.setSize(300, 55);
+        dialog.setLocationRelativeTo(null);
+        dialog.setLayout(new BorderLayout());
+        dialog.setLocationRelativeTo(api.userInterface().swingUtils().suiteFrame());
+
+        JProgressBar progressBar = new JProgressBar(0, 100);
+        progressBar.setStringPainted(true);
+        dialog.add(progressBar, BorderLayout.CENTER);
+
+        dialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
+
+        ProgressListener listener = progress ->
+                SwingUtilities.invokeLater(() -> progressBar.setValue(progress));
+
+        new Thread(() -> {
+            new SazMaker(selectedRequestResponsesList, fileName, listener).run();
+            SwingUtilities.invokeLater(dialog::dispose);
+        }).start();
+
+        dialog.setVisible(true);
     }
 
     private void showDirectoryChooseDialog(){
-        //OgaSazSave.logging.logToOutput("call showDirectoryChooseDialog()");
 
         File currentfile = new File(OgaSazSave.sazSavePath);
 

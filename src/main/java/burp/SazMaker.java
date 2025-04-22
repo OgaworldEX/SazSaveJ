@@ -1,9 +1,7 @@
 package burp;
 
-import burp.api.montoya.MontoyaApi;
 import burp.api.montoya.http.message.HttpHeader;
 import burp.api.montoya.http.message.HttpRequestResponse;
-import burp.api.montoya.ui.contextmenu.MessageEditorHttpRequestResponse;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -13,7 +11,7 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.io.IOException;
 
-public class SazMaker {
+public class SazMaker implements Runnable{
 
     //private final MontoyaApi api;
 
@@ -23,18 +21,22 @@ public class SazMaker {
     private static String sazMxml;
     private static String sazContentsTypesxml;
 
-    //private String savePath ;
+    private final ProgressListener listener;
+    private final List<HttpRequestResponse> selectedRequestResponsesList;
+    private final String fileName;
 
     static {
         sazMxml = getJarText("/Saz_m_xml.txt");
         sazContentsTypesxml = getJarText("/SazContentsTypesXml.txt");
     }
 
-    public SazMaker(MontoyaApi api) {
-        //this.api = api;
+    public SazMaker(List<HttpRequestResponse> selectedRequestResponsesList,String fileName,ProgressListener listener) {
+        this.listener = listener;
+        this.selectedRequestResponsesList = selectedRequestResponsesList;
+        this.fileName = fileName;
     }
 
-    public void makeSaz(List<HttpRequestResponse> selectedRequestResponsesList,String fileName) {
+    public void run(){
 
         //make tmp
         String tmpDirectory = System.getProperty("java.io.tmpdir");
@@ -65,6 +67,7 @@ public class SazMaker {
         //make indexhtml+row
         StringBuilder indexhtm = new StringBuilder();
         indexhtm.append(indexHeader);
+        int size = selectedRequestResponsesList.size();
         int i = 0;
         for (HttpRequestResponse requestResponse : selectedRequestResponsesList) {
 
@@ -115,6 +118,11 @@ public class SazMaker {
                     i, i, i, number, result, protocol, host, path, caching, contentType, process, comments, custom));
 
             i++;
+
+            if (listener != null) {
+                int scaled = (int)(((i) / (double)(size)) * (100) + 0);
+                listener.onProgress(scaled);
+            }
         }
         indexhtm.append(indexFooter);
         makeFile(indexhtm.toString(), targetDirectoryPath + "/_index.htm");
