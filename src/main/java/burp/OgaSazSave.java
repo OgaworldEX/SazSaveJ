@@ -10,7 +10,8 @@ import java.util.Properties;
 public class OgaSazSave implements BurpExtension
 {
     public final static String extensionName = "SazSaveJ";
-    public final static String version = "1.4.0";
+
+    public final static String version = "1.4.1";
 
     public final static String SAVE_PATH_KEY = "SAVE_PATH_KEY";
 

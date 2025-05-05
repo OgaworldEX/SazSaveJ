@@ -16,7 +16,7 @@ public class SazMaker implements Runnable{
     //private final MontoyaApi api;
 
     private final static String indexHeader = "<html><head><style>body,thead,td,a,p{font-family:verdana,sans-serif;font-size: 10px;}</style></head><body><table cols=12><thead><tr><th>&nbsp;</th><th>#</th><th>Result</th><th>Protocol</th><th>Host</th><th>URL</th><th>Body</th><th>Caching</th><th>Content-Type</th><th>Process</th><th>Comments</th><th>Custom</th></tr></thead><tbody>";
-    private final static String indexBodybase = "<tr><td><a href='raw\\%d_c.txt'>C</a>&nbsp;<a href='raw\\%d_s.txt'>S</a>&nbsp;<a href='raw\\%d_m.xml'>M</a></td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>body</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>";
+    private final static String indexBodybase = "<tr><td><a href='raw\\%s_c.txt'>C</a>&nbsp;<a href='raw\\%s_s.txt'>S</a>&nbsp;<a href='raw\\%s_m.xml'>M</a></td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>body</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>";
     private final static String indexFooter = "</tbody></table></body></html>";
     private static String sazMxml;
     private static String sazContentsTypesxml;
@@ -25,15 +25,23 @@ public class SazMaker implements Runnable{
     private final List<HttpRequestResponse> selectedRequestResponsesList;
     private final String fileName;
 
+    private int progresValue;
+
     static {
         sazMxml = getJarText("/Saz_m_xml.txt");
         sazContentsTypesxml = getJarText("/SazContentsTypesXml.txt");
+    }
+
+    public static String generateRawFileNumber(int number, int maxNumber) {
+        int digits = String.valueOf(maxNumber).length();
+        return String.format("%0" + digits + "d", number);
     }
 
     public SazMaker(List<HttpRequestResponse> selectedRequestResponsesList,String fileName,ProgressListener listener) {
         this.listener = listener;
         this.selectedRequestResponsesList = selectedRequestResponsesList;
         this.fileName = fileName;
+        this.progresValue = 0;
     }
 
     public void run(){
@@ -71,13 +79,15 @@ public class SazMaker implements Runnable{
         int i = 0;
         for (HttpRequestResponse requestResponse : selectedRequestResponsesList) {
 
+            String targetRawNumber = generateRawFileNumber(i,size);
+
             //0_c.txt
-            String c_txtFileName = i + "_c.txt";
+            String c_txtFileName = targetRawNumber + "_c.txt";
             byte[] addRequestByteArray = changeRequestLine(requestResponse);
             makeFile(addRequestByteArray, rawDirectoryPath + "/" + c_txtFileName);
 
             //0_m.xml
-            String m_xmlFileName = i + "_m.xml";
+            String m_xmlFileName = targetRawNumber + "_m.xml";
 
             //notes to comment
             String notes = requestResponse.annotations().notes();
@@ -87,14 +97,14 @@ public class SazMaker implements Runnable{
                 escapeComment = notes.replace("\"", "&quot;");
             }else{
                 escapeComment = "Notes could not be retrieved because there is a space at the beginning of the Notes field.";
-                OgaSazSave.logging.logToError(i + ": "+ escapeComment);
+                OgaSazSave.logging.logToError(targetRawNumber + ": "+ escapeComment);
             }
 
             String newSazXML = String.format(sazMxml,escapeComment);
             makeFile(newSazXML, rawDirectoryPath + "/" + m_xmlFileName);
 
             //0_s.txt
-            String s_txtFileName = i + "_s.txt";
+            String s_txtFileName = targetRawNumber + "_s.txt";
             if(requestResponse.response() == null){
                 makeFile("HTTP/0.0 999 No Response (SazSaveJ)\r\n\r\n".getBytes(), rawDirectoryPath + "/" + s_txtFileName);
             }else{
@@ -115,13 +125,13 @@ public class SazMaker implements Runnable{
 
             //_index.htm
             indexhtm.append(String.format(indexBodybase,
-                    i, i, i, number, result, protocol, host, path, caching, contentType, process, comments, custom));
+                    targetRawNumber, targetRawNumber, targetRawNumber, number, result, protocol, host, path, caching, contentType, process, comments, custom));
 
             i++;
 
             if (listener != null) {
-                int scaled = (int)(((i) / (double)(size)) * (100) + 0);
-                listener.onProgress(scaled);
+                progresValue = (int)(((i) / (double)(size)) * (50) + 0);
+                listener.onProgress(progresValue);
             }
         }
         indexhtm.append(indexFooter);
@@ -241,11 +251,18 @@ public class SazMaker implements Runnable{
         return retValue;
     }
 
-    private static void deleteFolder(File folder) {
+    private void deleteFolder(File folder) {
         if (folder.isDirectory()) {
             File[] files = folder.listFiles();
             if (files != null) {
+                int i = 0;
+                int size = files.length;
                 for (File file : files) {
+                    if (listener != null) {
+                        progresValue = (int)(((i) / (double)(size)) * (100) + 50);
+                        listener.onProgress(progresValue);
+                    }
+                    i++;
                     deleteFolder(file);
                 }
             }

@@ -123,6 +123,7 @@ public class SazSaveMenuItemsProvider implements ContextMenuItemsProvider
 
         JDialog dialog = new JDialog((Frame) null, "Processing...", true);
         dialog.setSize(300, 55);
+        dialog.setResizable(false);
         dialog.setLocationRelativeTo(null);
         dialog.setLayout(new BorderLayout());
         dialog.setLocationRelativeTo(api.userInterface().swingUtils().suiteFrame());
